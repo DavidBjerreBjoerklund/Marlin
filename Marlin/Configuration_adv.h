@@ -31,13 +31,8 @@
  * Basic settings can be found in Configuration.h
  *
  */
-<<<<<<< HEAD
 #define CONFIGURATION_ADV_H_VERSION 020000
-=======
-#ifndef CONFIGURATION_ADV_H
-#define CONFIGURATION_ADV_H
-#define CONFIGURATION_ADV_H_VERSION 010109
->>>>>>> 1.1.x
+
 
 // @section temperature
 
@@ -247,10 +242,7 @@
 #define E2_AUTO_FAN_PIN -1
 #define E3_AUTO_FAN_PIN -1
 #define E4_AUTO_FAN_PIN -1
-<<<<<<< HEAD
 #define E5_AUTO_FAN_PIN -1
-=======
->>>>>>> 1.1.x
 #define CHAMBER_AUTO_FAN_PIN -1
 #define EXTRUDER_AUTO_FAN_TEMPERATURE 50
 #define EXTRUDER_AUTO_FAN_SPEED 100   // 255 == full speed
@@ -296,7 +288,6 @@
 
 //#define Z_LATE_ENABLE // Enable Z the last moment. Needed if your Z driver overheats.
 
-<<<<<<< HEAD
 // Employ an external closed loop controller. Override pins here if needed.
 //#define EXTERNAL_CLOSED_LOOP_CONTROLLER
 #if ENABLED(EXTERNAL_CLOSED_LOOP_CONTROLLER)
@@ -304,8 +295,6 @@
   //#define CLOSED_LOOP_MOVE_COMPLETE_PIN -1
 #endif
 
-=======
->>>>>>> 1.1.x
 /**
  * Dual Steppers / Dual Endstops
  *
@@ -350,7 +339,6 @@
   #endif
 #endif
 
-<<<<<<< HEAD
 //#define Z_TRIPLE_STEPPER_DRIVERS
 #if ENABLED(Z_TRIPLE_STEPPER_DRIVERS)
   //#define Z_TRIPLE_ENDSTOPS
@@ -362,8 +350,7 @@
   #endif
 #endif
 
-=======
->>>>>>> 1.1.x
+
 /**
  * Dual X Carriage
  *
@@ -423,7 +410,6 @@
 // Enable this if X or Y can't home without homing the other axis first.
 //#define CODEPENDENT_XY_HOMING
 
-<<<<<<< HEAD
 /**
  * Z Steppers Auto-Alignment
  * Add the G34 command to align multiple Z steppers using a bed probe.
@@ -445,8 +431,6 @@
   #define Z_STEPPER_ALIGN_ACC 0.02
 #endif
 
-=======
->>>>>>> 1.1.x
 // @section machine
 
 #define AXIS_RELATIVE_MODES {false, false, false, false}
@@ -544,11 +528,8 @@
 //#define ADAPTIVE_STEP_SMOOTHING
 
 // Microstep setting (Only functional when stepper driver microstep pins are connected to MCU.
-<<<<<<< HEAD
 #define MICROSTEP_MODES { 128, 128, 128, 32, 16, 16 } // [1,2,4,8,16]
-=======
-#define MICROSTEP_MODES { 16, 16, 16, 16, 16 } // [1,2,4,8,16]
->>>>>>> 1.1.x
+
 
 /**
  *  @section  stepper motor current
@@ -580,29 +561,19 @@
   /**
    * Common slave addresses:
    *
-<<<<<<< HEAD
    *                        A   (A shifted)   B   (B shifted)  IC
    * Smoothie              0x2C (0x58)       0x2D (0x5A)       MCP4451
    * AZTEEG_X3_PRO         0x2C (0x58)       0x2E (0x5C)       MCP4451
    * AZTEEG_X5_MINI_WIFI         0x58              0x5C        MCP4451
    * MIGHTYBOARD_REVE      0x2F (0x5E)                         MCP4018
-=======
-   *                    A   (A shifted)   B   (B shifted)  IC
-   * Smoothie          0x2C (0x58)       0x2D (0x5A)       MCP4451
-   * AZTEEG_X3_PRO     0x2C (0x58)       0x2E (0x5C)       MCP4451
-   * MIGHTYBOARD_REVE  0x2F (0x5E)                         MCP4018
->>>>>>> 1.1.x
    */
   #define DIGIPOT_I2C_ADDRESS_A 0x2C  // unshifted slave address for first DIGIPOT
   #define DIGIPOT_I2C_ADDRESS_B 0x2D  // unshifted slave address for second DIGIPOT
 #endif
 
 //#define DIGIPOT_MCP4018          // Requires library from https://github.com/stawel/SlowSoftI2CMaster
-<<<<<<< HEAD
 #define DIGIPOT_I2C_NUM_CHANNELS 8 // 5DPRINT: 4     AZTEEG_X3_PRO: 8     MKS SBASE: 5
-=======
-#define DIGIPOT_I2C_NUM_CHANNELS 8 // 5DPRINT: 4     AZTEEG_X3_PRO: 8
->>>>>>> 1.1.x
+
 // Actual motor currents in Amps. The number of entries must match DIGIPOT_I2C_NUM_CHANNELS.
 // These correspond to the physical drivers, so be mindful if the order is changed.
 #define DIGIPOT_I2C_MOTOR_CURRENTS { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 }  //  AZTEEG_X3_PRO
@@ -635,11 +606,7 @@
 // Add an 'M73' G-code to set the current percentage
 //#define LCD_SET_PROGRESS_MANUALLY
 
-<<<<<<< HEAD
 #if HAS_PRINT_PROGRESS
-=======
-#if ENABLED(SDSUPPORT) || ENABLED(LCD_SET_PROGRESS_MANUALLY)
->>>>>>> 1.1.x
   //#define LCD_PROGRESS_BAR              // Show a progress bar on HD44780 LCDs for SD printing
   #if ENABLED(LCD_PROGRESS_BAR)
     #define PROGRESS_BAR_BAR_TIME 2000    // (ms) Amount of time to show the bar
@@ -648,11 +615,8 @@
     //#define PROGRESS_MSG_ONCE           // Show the message for MSG_TIME then clear it
     //#define LCD_PROGRESS_BAR_TEST       // Add a menu item to test the progress bar
   #endif
-<<<<<<< HEAD
 #endif // HAS_PRINT_PROGRESS
-=======
-#endif // SDSUPPORT || LCD_SET_PROGRESS_MANUALLY
->>>>>>> 1.1.x
+
 
 /**
  * LED Control Menu
@@ -681,21 +645,12 @@
   #define SD_DETECT_INVERTED
 
   #define SD_FINISHED_STEPPERRELEASE true          // Disable steppers when SD Print is finished
-<<<<<<< HEAD
   #define SD_FINISHED_RELEASECOMMAND "M84 X Y Z E" // You might want to keep the Z enabled so your bed stays in place.
 
   // Reverse SD sort to show "more recent" files first, according to the card's FAT.
   // Since the FAT gets out of order with usage, SDCARD_SORT_ALPHA is recommended.
   #define SDCARD_RATHERRECENTFIRST
 
-=======
-  #define SD_FINISHED_RELEASECOMMAND "M84 X Y Z E" // You might want to keep the z enabled so your bed stays in place.
-
-  // Reverse SD sort to show "more recent" files first, according to the card's FAT.
-  // Since the FAT gets out of order with usage, SDCARD_SORT_ALPHA is recommended.
-  #define SDCARD_RATHERRECENTFIRST
-
->>>>>>> 1.1.x
   // Add an option in the menu to run all auto#.g files
   //#define MENU_ADDAUTOSTART
 
@@ -707,11 +662,8 @@
    * an option on the LCD screen to continue the print from the last-known
    * point in the file.
    */
-<<<<<<< HEAD
   #define POWER_LOSS_RECOVERY
-=======
-  //#define POWER_LOSS_RECOVERY
->>>>>>> 1.1.x
+
   #if ENABLED(POWER_LOSS_RECOVERY)
     //#define POWER_LOSS_PIN   44     // Pin to detect power loss
     //#define POWER_LOSS_STATE HIGH   // State of pin indicating power loss
@@ -759,11 +711,8 @@
   //#define LONG_FILENAME_HOST_SUPPORT
 
   // Enable this option to scroll long filenames in the SD card menu
-<<<<<<< HEAD
   #define SCROLL_LONG_FILENAMES
-=======
-  //#define SCROLL_LONG_FILENAMES
->>>>>>> 1.1.x
+
 
   /**
    * This option allows you to abort SD printing when any endstop is triggered.
@@ -784,7 +733,6 @@
    */
   //#define AUTO_REPORT_SD_STATUS
 
-<<<<<<< HEAD
   /**
    * Support for USB thumb drives using an Arduino USB Host Shield or
    * equivalent MAX3421E breakout board. The USB thumb drive will appear
@@ -822,8 +770,6 @@
   // Add an optimized binary file transfer mode, initiated with 'M28 B1'
   //#define FAST_FILE_TRANSFER
 
-=======
->>>>>>> 1.1.x
 #endif // SDSUPPORT
 
 /**
@@ -838,11 +784,9 @@
  * controller events, as there is a trade-off between reliable
  * printing performance versus fast display updates.
  */
-<<<<<<< HEAD
+
 #if HAS_GRAPHICAL_LCD
-=======
-#if ENABLED(DOGLCD)
->>>>>>> 1.1.x
+
   // Show SD percentage next to the progress bar
   //#define DOGM_SD_PERCENT
 
@@ -912,7 +856,6 @@
  */
 //#define BABYSTEPPING
 #if ENABLED(BABYSTEPPING)
-<<<<<<< HEAD
   //#define BABYSTEP_XY                     // Also enable X/Y Babystepping. Not supported on DELTA!
   #define BABYSTEP_INVERT_Z false           // Change if Z babysteps should go the other way
   #define BABYSTEP_MULTIPLICATOR  1         // Babysteps are very small. Increase for faster motion.
@@ -922,24 +865,12 @@
     #define DOUBLECLICK_MAX_INTERVAL 1250   // Maximum interval between clicks, in milliseconds.
                                             // Note: Extra time may be added to mitigate controller latency.
   #endif
-=======
-  //#define BABYSTEP_XY              // Also enable X/Y Babystepping. Not supported on DELTA!
-  #define BABYSTEP_INVERT_Z false    // Change if Z babysteps should go the other way
-  #define BABYSTEP_MULTIPLICATOR 1   // Babysteps are very small. Increase for faster motion.
-  //#define BABYSTEP_ZPROBE_OFFSET   // Enable to combine M851 and Babystepping
-  //#define DOUBLECLICK_FOR_Z_BABYSTEPPING // Double-click on the Status Screen for Z Babystepping.
-  #define DOUBLECLICK_MAX_INTERVAL 1250 // Maximum interval between clicks, in milliseconds.
-                                        // Note: Extra time may be added to mitigate controller latency.
-  //#define BABYSTEP_ZPROBE_GFX_OVERLAY // Enable graphical overlay on Z-offset editor
-#endif
->>>>>>> 1.1.x
 
   //#define MOVE_Z_WHEN_IDLE                // Jump to the move Z menu on doubleclick when printer is idle.
   #if ENABLED(MOVE_Z_WHEN_IDLE)
     #define MOVE_Z_IDLE_MULTIPLICATOR 1     // Multiply 1mm by this factor for the move step size.
   #endif
 
-<<<<<<< HEAD
   #define BABYSTEP_ZPROBE_OFFSET          // Combine M851 Z and Babystepping
   #if ENABLED(BABYSTEP_ZPROBE_OFFSET)
     //#define BABYSTEP_HOTEND_Z_OFFSET      // For multiple hotends, babystep relative Z offsets
@@ -949,8 +880,7 @@
 
 // @section extruder
 
-=======
->>>>>>> 1.1.x
+
 /**
  * Linear Pressure Control v1.5
  *
@@ -981,7 +911,6 @@
   //#define MESH_MIN_Y MESH_INSET
   //#define MESH_MAX_X X_BED_SIZE - (MESH_INSET)
   //#define MESH_MAX_Y Y_BED_SIZE - (MESH_INSET)
-<<<<<<< HEAD
 #endif
 
 /**
@@ -1006,8 +935,6 @@
    */
   #define G29_ACTION_ON_RECOVER "probe_rewipe"
   #define G29_ACTION_ON_FAILURE "probe_failed"
-=======
->>>>>>> 1.1.x
 #endif
 
 // @section extras
@@ -1041,10 +968,7 @@
  *     0 : No delay (Expect at least 10µS since one Stepper ISR must transpire)
  *    20 : Minimum for TMC2xxx drivers
  *   200 : Minimum for A4988 drivers
-<<<<<<< HEAD
  *   400 : Minimum for A5984 drivers
-=======
->>>>>>> 1.1.x
  *   500 : Minimum for LV8729 drivers (guess, no info in datasheet)
  *   650 : Minimum for DRV8825 drivers
  *  1500 : Minimum for TB6600 drivers (guess, no info in datasheet)
@@ -1057,12 +981,7 @@
 /**
  * Minimum stepper driver pulse width (in µs)
  *   0 : Smallest possible width the MCU can produce, compatible with TMC2xxx drivers
-<<<<<<< HEAD
  *   1 : Minimum for A4988, A5984, and LV8729 stepper drivers
-=======
- *   1 : Minimum for A4988 stepper drivers
- *   1 : Minimum for LV8729 stepper drivers
->>>>>>> 1.1.x
  *   2 : Minimum for DRV8825 stepper drivers
  *   3 : Minimum for TB6600 stepper drivers
  *  30 : Minimum for TB6560 stepper drivers
@@ -1348,13 +1267,10 @@
   #define E4_SENSE_RESISTOR   91
   #define E4_MICROSTEPS       16
 
-<<<<<<< HEAD
   #define E5_MAX_CURRENT    1000
   #define E5_SENSE_RESISTOR   91
   #define E5_MICROSTEPS       16
 
-=======
->>>>>>> 1.1.x
 #endif // TMC26X
 
 // @section tmc_smart
@@ -1365,13 +1281,8 @@
  * in your `pins_MYBOARD.h` file. (e.g., RAMPS 1.4 uses AUX3 pins `X_CS_PIN 53`, `Y_CS_PIN 49`, etc.).
  * You may also use software SPI if you wish to use general purpose IO pins.
  *
-<<<<<<< HEAD
  * The TMC2130Stepper library is required for this stepper driver.
  * https://github.com/teemuatlut/TMC2130Stepper
-=======
- * You'll also need the TMC2130Stepper Arduino library
- * (https://github.com/teemuatlut/TMC2130Stepper).
->>>>>>> 1.1.x
  *
  * To use TMC2208 stepper UART-configurable stepper drivers
  * connect #_SERIAL_TX_PIN to the driver side PDN_UART pin with a 1K resistor.
@@ -1379,13 +1290,8 @@
  * to PDN_UART without a resistor.
  * The drivers can also be used with hardware serial.
  *
-<<<<<<< HEAD
  * The TMC2208Stepper library is required for this stepper driver.
  * https://github.com/teemuatlut/TMC2208Stepper
-=======
- * You'll also need the TMC2208Stepper Arduino library
- * (https://github.com/teemuatlut/TMC2208Stepper).
->>>>>>> 1.1.x
  */
 #if HAS_TRINAMIC
 
@@ -1410,7 +1316,6 @@
 
   #define Z2_CURRENT         800
   #define Z2_MICROSTEPS       16
-<<<<<<< HEAD
 
   #define Z3_CURRENT         800
   #define Z3_MICROSTEPS       16
@@ -1432,23 +1337,6 @@
 
   #define E5_CURRENT         800
   #define E5_MICROSTEPS       16
-=======
-
-  #define E0_CURRENT         800
-  #define E0_MICROSTEPS       16
-
-  #define E1_CURRENT         800
-  #define E1_MICROSTEPS       16
-
-  #define E2_CURRENT         800
-  #define E2_MICROSTEPS       16
-
-  #define E3_CURRENT         800
-  #define E3_MICROSTEPS       16
-
-  #define E4_CURRENT         800
-  #define E4_MICROSTEPS       16
->>>>>>> 1.1.x
 
   /**
    * Use software SPI for TMC2130.
@@ -1499,10 +1387,7 @@
   #define Y2_HYBRID_THRESHOLD    100
   #define Z_HYBRID_THRESHOLD       3
   #define Z2_HYBRID_THRESHOLD      3
-<<<<<<< HEAD
   #define Z3_HYBRID_THRESHOLD      3
-=======
->>>>>>> 1.1.x
   #define E0_HYBRID_THRESHOLD     30
   #define E1_HYBRID_THRESHOLD     30
   #define E2_HYBRID_THRESHOLD     30
@@ -1511,19 +1396,11 @@
   #define E5_HYBRID_THRESHOLD     30
 
   /**
-<<<<<<< HEAD
    * Use StallGuard2 to sense an obstacle and trigger an endstop.
    * Connect the stepper driver's DIAG1 pin to the X/Y endstop pin.
    * X, Y, and Z homing will always be done in spreadCycle mode.
    *
    * X/Y/Z_STALL_SENSITIVITY is used for tuning the trigger sensitivity.
-=======
-   * Use stallGuard2 to sense an obstacle and trigger an endstop.
-   * You need to place a wire from the driver's DIAG1 pin to the X/Y endstop pin.
-   * X, Y, and Z homing will always be done in spreadCycle mode.
-   *
-   * X/Y/Z_HOMING_SENSITIVITY is used for tuning the trigger sensitivity.
->>>>>>> 1.1.x
    * Higher values make the system LESS sensitive.
    * Lower value make the system MORE sensitive.
    * Too low values can lead to false positives, while too high values will collide the axis without triggering.
@@ -1532,7 +1409,6 @@
    */
   //#define SENSORLESS_HOMING // TMC2130 only
 
-<<<<<<< HEAD
   /**
    * Use StallGuard2 to probe the bed with the nozzle.
    *
@@ -1545,12 +1421,6 @@
     #define X_STALL_SENSITIVITY  8
     #define Y_STALL_SENSITIVITY  8
     //#define Z_STALL_SENSITIVITY  8
-=======
-  #if ENABLED(SENSORLESS_HOMING)
-    #define X_HOMING_SENSITIVITY  8
-    #define Y_HOMING_SENSITIVITY  8
-    #define Z_HOMING_SENSITIVITY  8
->>>>>>> 1.1.x
   #endif
 
   /**
@@ -1589,11 +1459,7 @@
    */
   #define TMC_ADV() {  }
 
-<<<<<<< HEAD
 #endif // HAS_TRINAMIC
-=======
-#endif // TMC2130 || TMC2208
->>>>>>> 1.1.x
 
 // @section L6470
 
@@ -1605,7 +1471,6 @@
  */
 #if HAS_DRIVER(L6470)
 
-<<<<<<< HEAD
   #define X_MICROSTEPS        16 // number of microsteps
   #define X_OVERCURRENT     2000 // maxc current in mA. If the current goes over this value, the driver will switch off
   #define X_STALLCURRENT    1500 // current in mA where the driver will detect a stall
@@ -1658,52 +1523,6 @@
   #define E5_OVERCURRENT    2000
   #define E5_STALLCURRENT   1500
 
-=======
-  #define X_MICROSTEPS      16 // number of microsteps
-  #define X_OVERCURRENT   2000 // maxc current in mA. If the current goes over this value, the driver will switch off
-  #define X_STALLCURRENT  1500 // current in mA where the driver will detect a stall
-
-  #define X2_MICROSTEPS     16
-  #define X2_OVERCURRENT  2000
-  #define X2_STALLCURRENT 1500
-
-  #define Y_MICROSTEPS      16
-  #define Y_OVERCURRENT   2000
-  #define Y_STALLCURRENT  1500
-
-  #define Y2_MICROSTEPS     16
-  #define Y2_OVERCURRENT  2000
-  #define Y2_STALLCURRENT 1500
-
-  #define Z_MICROSTEPS      16
-  #define Z_OVERCURRENT   2000
-  #define Z_STALLCURRENT  1500
-
-  #define Z2_MICROSTEPS     16
-  #define Z2_OVERCURRENT  2000
-  #define Z2_STALLCURRENT 1500
-
-  #define E0_MICROSTEPS     16
-  #define E0_OVERCURRENT  2000
-  #define E0_STALLCURRENT 1500
-
-  #define E1_MICROSTEPS     16
-  #define E1_OVERCURRENT  2000
-  #define E1_STALLCURRENT 1500
-
-  #define E2_MICROSTEPS     16
-  #define E2_OVERCURRENT  2000
-  #define E2_STALLCURRENT 1500
-
-  #define E3_MICROSTEPS     16
-  #define E3_OVERCURRENT  2000
-  #define E3_STALLCURRENT 1500
-
-  #define E4_MICROSTEPS     16
-  #define E4_OVERCURRENT  2000
-  #define E4_STALLCURRENT 1500
-
->>>>>>> 1.1.x
 #endif // L6470
 
 /**
@@ -2061,11 +1880,8 @@
   #define MAX7219_NUMBER_UNITS 1   // Number of Max7219 units in chain.
   #define MAX7219_ROTATE       0   // Rotate the display clockwise (in multiples of +/- 90°)
                                    // connector at:  right=0   bottom=-90  top=90  left=180
-<<<<<<< HEAD
   //#define MAX7219_REVERSE_ORDER  // The individual LED matrix units may be in reversed order
 
-=======
->>>>>>> 1.1.x
   /**
    * Sample debug features
    * If you add more debug displays, be careful to avoid conflicts!
@@ -2092,7 +1908,6 @@
                               // Default behaviour is limited to Z axis only.
 #endif
 
-<<<<<<< HEAD
 /**
  * WiFi Support (Espressif ESP32 WiFi)
  */
@@ -2104,9 +1919,3 @@
 
 // Enable Marlin dev mode which adds some special commands
 //#define MARLIN_DEV_MODE
-=======
-// Enable Marlin dev mode which adds some special commands
-//#define MARLIN_DEV_MODE
-
-#endif // CONFIGURATION_ADV_H
->>>>>>> 1.1.x
