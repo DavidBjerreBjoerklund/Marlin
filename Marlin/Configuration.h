@@ -598,9 +598,9 @@
  *          TMC5130, TMC5130_STANDALONE
  * :['A4988', 'A5984', 'DRV8825', 'LV8729', 'L6470', 'TB6560', 'TB6600', 'TMC2100', 'TMC2130', 'TMC2130_STANDALONE', 'TMC2208', 'TMC2208_STANDALONE', 'TMC26X', 'TMC26X_STANDALONE', 'TMC2660', 'TMC2660_STANDALONE', 'TMC5130', 'TMC5130_STANDALONE']
  */
-#define X_DRIVER_TYPE  LV8729
-#define Y_DRIVER_TYPE  LV8729
-#define Z_DRIVER_TYPE  LV8729
+#define X_DRIVER_TYPE  DRV8825
+//#define Y_DRIVER_TYPE  LV8729
+//#define Z_DRIVER_TYPE  LV8729
 //#define X2_DRIVER_TYPE A4988
 //#define Y2_DRIVER_TYPE A4988
 //#define Z2_DRIVER_TYPE A4988
@@ -653,9 +653,9 @@
 //#define DISTINCT_E_FACTORS
 
 #define X_MOTOR_STEPS 400
-#define X_DRIVER       128
+#define X_DRIVER       32
 #define X_BELT_PITCH  2
-#define X_PULLY_TEETH 30
+#define X_PULLY_TEETH 32
 #define X_STEPS_PER_MM ((X_MOTOR_STEPS * X_DRIVER)/(X_BELT_PITCH * X_PULLY_TEETH))
 
 #define Y_MOTOR_STEPS 200
@@ -667,7 +667,7 @@
 #define Z_MOTOR_STEPS 200
 #define Z_DRIVER      128
 #define Z_THREAD_PITCH  2
-#define Z_STEPS_PER_MM ((Z_MOTOR_STEPS * Z_DRIVER)/(Z_THREAD_PITCH * 2)) 
+#define Z_STEPS_PER_MM ((Z_MOTOR_STEPS * Z_DRIVER)/(Z_THREAD_PITCH * 4)) 
 
 #define E_MOTOR_STEPS 400
 #define E_DRIVER 32
@@ -730,17 +730,7 @@
  *
  * See https://github.com/synthetos/TinyG/wiki/Jerk-Controlled-Motion-Explained
  */
-//#define S_CURVE_ACCELERATION
-
-/**
- * S-Curve Acceleration
- *
- * This option eliminates vibration during printing by fitting a Bézier
- * curve to move acceleration, producing much smoother direction changes.
- *
- * See https://github.com/synthetos/TinyG/wiki/Jerk-Controlled-Motion-Explained
- */
-//#define S_CURVE_ACCELERATION
+#define S_CURVE_ACCELERATION
 
 //===========================================================================
 //============================= Z Probe Options =============================
@@ -926,7 +916,7 @@
 
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
 // :{ 0:'Low', 1:'High' }
-#define X_ENABLE_ON 1
+#define X_ENABLE_ON 0
 #define Y_ENABLE_ON 1
 #define Z_ENABLE_ON 1
 #define E_ENABLE_ON 0 // For all extruders
