@@ -1,6 +1,6 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (C) 2019 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (C) 2016 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
  * Copyright (C) 2011 Camiel Gubbels / Erik van der Zalm
@@ -26,7 +26,7 @@
 
 #include "../../../inc/MarlinConfig.h"
 
-#if HAS_ABL_NOT_UBL
+#if OLDSCHOOL_ABL
 
 #include "../../gcode.h"
 #include "../../../feature/bedlevel/bedlevel.h"
@@ -36,7 +36,7 @@
 #include "../../../module/probe.h"
 #include "../../queue.h"
 
-#if BOTH(LCD_BED_LEVELING, PROBE_MANUALLY)
+#if ENABLED(LCD_BED_LEVELING) && ENABLED(PROBE_MANUALLY)
   #include "../../../lcd/ultralcd.h"
 #endif
 
@@ -47,9 +47,6 @@
 #if ABL_PLANAR
   #include "../../../libs/vector_3.h"
 #endif
-
-#define DEBUG_OUT ENABLED(DEBUG_LEVELING_FEATURE)
-#include "../../../core/debug_out.h"
 
 #if ABL_GRID
   #if ENABLED(PROBE_Y_FIRST)
@@ -151,7 +148,7 @@
  */
 G29_TYPE GcodeSuite::G29() {
 
-  #if EITHER(DEBUG_LEVELING_FEATURE, PROBE_MANUALLY)
+  #if ENABLED(DEBUG_LEVELING_FEATURE) || ENABLED(PROBE_MANUALLY)
     const bool seenQ = parser.seen('Q');
   #else
     constexpr bool seenQ = false;
@@ -190,7 +187,12 @@ G29_TYPE GcodeSuite::G29() {
   if (axis_unhomed_error()) G29_RETURN(false);
 
   if (!no_action && planner.leveling_active && parser.boolval('O')) { // Auto-level only if needed
-    if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("> Auto-level not needed, skip\n<<< G29");
+    #if ENABLED(DEBUG_LEVELING_FEATURE)
+      if (DEBUGGING(LEVELING)) {
+        SERIAL_ECHOLNPGM("> Auto-level not needed, skip");
+        SERIAL_ECHOLNPGM("<<< G29");
+      }
+    #endif
     G29_RETURN(false);
   }
 
@@ -205,12 +207,12 @@ G29_TYPE GcodeSuite::G29() {
   ABL_VAR float xProbe, yProbe, measured_z;
   ABL_VAR bool dryrun, abl_should_enable;
 
-  #if EITHER(PROBE_MANUALLY, AUTO_BED_LEVELING_LINEAR)
+  #if ENABLED(PROBE_MANUALLY) || ENABLED(AUTO_BED_LEVELING_LINEAR)
     ABL_VAR int abl_probe_index;
   #endif
 
   #if HAS_SOFTWARE_ENDSTOPS && ENABLED(PROBE_MANUALLY)
-    ABL_VAR bool saved_soft_endstops_state = true;
+    ABL_VAR bool enable_soft_endstops = true;
   #endif
 
   #if ABL_GRID
@@ -280,7 +282,7 @@ G29_TYPE GcodeSuite::G29() {
       if (active_extruder != 0) tool_change(0);
     #endif
 
-    #if EITHER(PROBE_MANUALLY, AUTO_BED_LEVELING_LINEAR)
+    #if ENABLED(PROBE_MANUALLY) || ENABLED(AUTO_BED_LEVELING_LINEAR)
       abl_probe_index = -1;
     #endif
 
@@ -291,13 +293,15 @@ G29_TYPE GcodeSuite::G29() {
       const bool seen_w = parser.seen('W');
       if (seen_w) {
         if (!leveling_is_valid()) {
-          SERIAL_ERROR_MSG("No bilinear grid");
+          SERIAL_ERROR_START();
+          SERIAL_ERRORLNPGM("No bilinear grid");
           G29_RETURN(false);
         }
 
         const float rz = parser.seenval('Z') ? RAW_Z_POSITION(parser.value_linear_units()) : current_position[Z_AXIS];
         if (!WITHIN(rz, -10, 10)) {
-          SERIAL_ERROR_MSG("Bad Z value");
+          SERIAL_ERROR_START();
+          SERIAL_ERRORLNPGM("Bad Z value");
           G29_RETURN(false);
         }
 
@@ -319,9 +323,6 @@ G29_TYPE GcodeSuite::G29() {
           #if ENABLED(ABL_BILINEAR_SUBDIVISION)
             bed_level_virt_interpolate();
           #endif
-          #if ENABLED(EXTENSIBLE_UI)
-            ExtUI::onMeshUpdate(i, j, rz);
-          #endif
           set_bed_leveling_enabled(abl_should_enable);
           if (abl_should_enable) report_current_position();
         }
@@ -342,7 +343,7 @@ G29_TYPE GcodeSuite::G29() {
 
     verbose_level = parser.intval('V');
     if (!WITHIN(verbose_level, 0, 4)) {
-      SERIAL_ECHOLNPGM("?(V)erbose level is implausible (0-4).");
+      SERIAL_PROTOCOLLNPGM("?(V)erbose level is implausible (0-4).");
       G29_RETURN(false);
     }
 
@@ -363,11 +364,11 @@ G29_TYPE GcodeSuite::G29() {
       if (parser.seenval('P')) abl_grid_points_x = abl_grid_points_y = parser.value_int();
 
       if (!WITHIN(abl_grid_points_x, 2, GRID_MAX_POINTS_X)) {
-        SERIAL_ECHOLNPGM("?Probe points (X) is implausible (2-" STRINGIFY(GRID_MAX_POINTS_X) ").");
+        SERIAL_PROTOCOLLNPGM("?Probe points (X) is implausible (2-" STRINGIFY(GRID_MAX_POINTS_X) ").");
         G29_RETURN(false);
       }
       if (!WITHIN(abl_grid_points_y, 2, GRID_MAX_POINTS_Y)) {
-        SERIAL_ECHOLNPGM("?Probe points (Y) is implausible (2-" STRINGIFY(GRID_MAX_POINTS_Y) ").");
+        SERIAL_PROTOCOLLNPGM("?Probe points (Y) is implausible (2-" STRINGIFY(GRID_MAX_POINTS_Y) ").");
         G29_RETURN(false);
       }
 
@@ -386,10 +387,10 @@ G29_TYPE GcodeSuite::G29() {
 
       if (parser.seen('H')) {
         const int16_t size = (int16_t)parser.value_linear_units();
-        left_probe_bed_position  = MAX(X_CENTER - size / 2, MIN_PROBE_X);
-        right_probe_bed_position = MIN(left_probe_bed_position + size, MAX_PROBE_X);
-        front_probe_bed_position = MAX(Y_CENTER - size / 2, MIN_PROBE_Y);
-        back_probe_bed_position  = MIN(front_probe_bed_position + size, MAX_PROBE_Y);
+        left_probe_bed_position  = MAX((MIN_PROBE_X + MAX_PROBE_X - size) / 2, MIN_PROBE_X);
+        right_probe_bed_position = MIN(left_probe_bed_position + size,         MAX_PROBE_X);
+        front_probe_bed_position = MAX((MIN_PROBE_Y + MAX_PROBE_Y - size) / 2, MIN_PROBE_Y);
+        back_probe_bed_position  = MIN(front_probe_bed_position + size,        MAX_PROBE_Y);
       }
       else {
         left_probe_bed_position  = parser.seenval('L') ? (int)RAW_X_POSITION(parser.value_linear_units()) : LEFT_PROBE_BED_POSITION;
@@ -409,7 +410,7 @@ G29_TYPE GcodeSuite::G29() {
           || !position_is_reachable_by_probe(right_probe_bed_position, back_probe_bed_position)
         #endif
       ) {
-        SERIAL_ECHOLNPGM("? (L,R,F,B) out of bounds.");
+        SERIAL_PROTOCOLLNPGM("? (L,R,F,B) out of bounds.");
         G29_RETURN(false);
       }
 
@@ -420,8 +421,8 @@ G29_TYPE GcodeSuite::G29() {
     #endif // ABL_GRID
 
     if (verbose_level > 0) {
-      SERIAL_ECHOPGM("G29 Auto Bed Leveling");
-      if (dryrun) SERIAL_ECHOPGM(" (DRYRUN)");
+      SERIAL_PROTOCOLPGM("G29 Auto Bed Leveling");
+      if (dryrun) SERIAL_PROTOCOLPGM(" (DRYRUN)");
       SERIAL_EOL();
     }
 
@@ -468,7 +469,9 @@ G29_TYPE GcodeSuite::G29() {
 
     #if ENABLED(AUTO_BED_LEVELING_3POINT)
 
-      if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("> 3-point Leveling");
+      #if ENABLED(DEBUG_LEVELING_FEATURE)
+        if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("> 3-point Leveling");
+      #endif
 
       // Probe at 3 arbitrary points
       points[0].z = points[1].z = points[2].z = 0;
@@ -488,9 +491,9 @@ G29_TYPE GcodeSuite::G29() {
 
     // Abort current G29 procedure, go back to idle state
     if (seenA && g29_in_progress) {
-      SERIAL_ECHOLNPGM("Manual G29 aborted");
+      SERIAL_PROTOCOLLNPGM("Manual G29 aborted");
       #if HAS_SOFTWARE_ENDSTOPS
-        soft_endstops_enabled = saved_soft_endstops_state;
+        soft_endstops_enabled = enable_soft_endstops;
       #endif
       set_bed_leveling_enabled(abl_should_enable);
       g29_in_progress = false;
@@ -501,13 +504,13 @@ G29_TYPE GcodeSuite::G29() {
 
     // Query G29 status
     if (verbose_level || seenQ) {
-      SERIAL_ECHOPGM("Manual G29 ");
+      SERIAL_PROTOCOLPGM("Manual G29 ");
       if (g29_in_progress) {
-        SERIAL_ECHOPAIR("point ", MIN(abl_probe_index + 1, abl_points));
-        SERIAL_ECHOLNPAIR(" of ", abl_points);
+        SERIAL_PROTOCOLPAIR("point ", MIN(abl_probe_index + 1, abl_points));
+        SERIAL_PROTOCOLLNPAIR(" of ", abl_points);
       }
       else
-        SERIAL_ECHOLNPGM("idle");
+        SERIAL_PROTOCOLLNPGM("idle");
     }
 
     if (no_action) G29_RETURN(false);
@@ -515,14 +518,14 @@ G29_TYPE GcodeSuite::G29() {
     if (abl_probe_index == 0) {
       // For the initial G29 S2 save software endstop state
       #if HAS_SOFTWARE_ENDSTOPS
-        saved_soft_endstops_state = soft_endstops_enabled;
+        enable_soft_endstops = soft_endstops_enabled;
       #endif
       // Move close to the bed before the first point
       do_blocking_move_to_z(0);
     }
     else {
 
-      #if EITHER(AUTO_BED_LEVELING_LINEAR, AUTO_BED_LEVELING_3POINT)
+      #if ENABLED(AUTO_BED_LEVELING_LINEAR) || ENABLED(AUTO_BED_LEVELING_3POINT)
         const uint16_t index = abl_probe_index - 1;
       #endif
 
@@ -547,11 +550,14 @@ G29_TYPE GcodeSuite::G29() {
       #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
 
         z_values[xCount][yCount] = measured_z + zoffset;
-        #if ENABLED(EXTENSIBLE_UI)
-          ExtUI::onMeshUpdate(xCount, yCount, z_values[xCount][yCount]);
-        #endif
 
-        if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("Save X", xCount, " Y", yCount, " Z", measured_z + zoffset);
+        #if ENABLED(DEBUG_LEVELING_FEATURE)
+          if (DEBUGGING(LEVELING)) {
+            SERIAL_PROTOCOLPAIR("Save X", xCount);
+            SERIAL_PROTOCOLPAIR(" Y", yCount);
+            SERIAL_PROTOCOLLNPAIR(" Z", measured_z + zoffset);
+          }
+        #endif
 
       #endif
     }
@@ -603,11 +609,11 @@ G29_TYPE GcodeSuite::G29() {
 
         // Leveling done! Fall through to G29 finishing code below
 
-        SERIAL_ECHOLNPGM("Grid probing done.");
+        SERIAL_PROTOCOLLNPGM("Grid probing done.");
 
         // Re-enable software endstops, if needed
         #if HAS_SOFTWARE_ENDSTOPS
-          soft_endstops_enabled = saved_soft_endstops_state;
+          soft_endstops_enabled = enable_soft_endstops;
         #endif
       }
 
@@ -627,11 +633,11 @@ G29_TYPE GcodeSuite::G29() {
       }
       else {
 
-        SERIAL_ECHOLNPGM("3-point probing done.");
+        SERIAL_PROTOCOLLNPGM("3-point probing done.");
 
         // Re-enable software endstops, if needed
         #if HAS_SOFTWARE_ENDSTOPS
-          soft_endstops_enabled = saved_soft_endstops_state;
+          soft_endstops_enabled = enable_soft_endstops;
         #endif
 
         if (!dryrun) {
@@ -719,9 +725,6 @@ G29_TYPE GcodeSuite::G29() {
           #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
 
             z_values[xCount][yCount] = measured_z + zoffset;
-            #if ENABLED(EXTENSIBLE_UI)
-              ExtUI::onMeshUpdate(xCount, yCount, z_values[xCount][yCount]);
-            #endif
 
           #endif
 
@@ -780,7 +783,9 @@ G29_TYPE GcodeSuite::G29() {
   // return or loop before this point.
   //
 
-  if (DEBUGGING(LEVELING)) DEBUG_POS("> probing complete", current_position);
+  #if ENABLED(DEBUG_LEVELING_FEATURE)
+    if (DEBUGGING(LEVELING)) DEBUG_POS("> probing complete", current_position);
+  #endif
 
   #if ENABLED(PROBE_MANUALLY)
     g29_in_progress = false;
@@ -824,12 +829,18 @@ G29_TYPE GcodeSuite::G29() {
       mean /= abl_points;
 
       if (verbose_level) {
-        SERIAL_ECHOPAIR_F("Eqn coefficients: a: ", plane_equation_coefficients[0], 8);
-        SERIAL_ECHOPAIR_F(" b: ", plane_equation_coefficients[1], 8);
-        SERIAL_ECHOPAIR_F(" d: ", plane_equation_coefficients[2], 8);
-        if (verbose_level > 2)
-          SERIAL_ECHOPAIR_F("\nMean of sampled points: ", mean, 8);
+        SERIAL_PROTOCOLPGM("Eqn coefficients: a: ");
+        SERIAL_PROTOCOL_F(plane_equation_coefficients[0], 8);
+        SERIAL_PROTOCOLPGM(" b: ");
+        SERIAL_PROTOCOL_F(plane_equation_coefficients[1], 8);
+        SERIAL_PROTOCOLPGM(" d: ");
+        SERIAL_PROTOCOL_F(plane_equation_coefficients[2], 8);
         SERIAL_EOL();
+        if (verbose_level > 2) {
+          SERIAL_PROTOCOLPGM("Mean of sampled points: ");
+          SERIAL_PROTOCOL_F(mean, 8);
+          SERIAL_EOL();
+        }
       }
 
       // Create the matrix but don't correct the position yet
@@ -841,7 +852,7 @@ G29_TYPE GcodeSuite::G29() {
       // Show the Topography map if enabled
       if (do_topography_map) {
 
-        SERIAL_ECHOLNPGM("\nBed Height Topography:\n"
+        SERIAL_PROTOCOLLNPGM("\nBed Height Topography:\n"
                                "   +--- BACK --+\n"
                                "   |           |\n"
                                " L |    (+)    | R\n"
@@ -868,17 +879,17 @@ G29_TYPE GcodeSuite::G29() {
             NOMORE(min_diff, eqnBVector[ind] - z_tmp);
 
             if (diff >= 0.0)
-              SERIAL_ECHOPGM(" +");   // Include + for column alignment
+              SERIAL_PROTOCOLPGM(" +");   // Include + for column alignment
             else
-              SERIAL_CHAR(' ');
-            SERIAL_ECHO_F(diff, 5);
+              SERIAL_PROTOCOLCHAR(' ');
+            SERIAL_PROTOCOL_F(diff, 5);
           } // xx
           SERIAL_EOL();
         } // yy
         SERIAL_EOL();
 
         if (verbose_level > 3) {
-          SERIAL_ECHOLNPGM("\nCorrected Bed Height vs. Bed Topology:");
+          SERIAL_PROTOCOLLNPGM("\nCorrected Bed Height vs. Bed Topology:");
 
           for (int8_t yy = abl_grid_points_y - 1; yy >= 0; yy--) {
             for (uint8_t xx = 0; xx < abl_grid_points_x; xx++) {
@@ -891,11 +902,11 @@ G29_TYPE GcodeSuite::G29() {
 
               float diff = eqnBVector[ind] - z_tmp - min_diff;
               if (diff >= 0.0)
-                SERIAL_ECHOPGM(" +");
+                SERIAL_PROTOCOLPGM(" +");
               // Include + for column alignment
               else
-                SERIAL_CHAR(' ');
-              SERIAL_ECHO_F(diff, 5);
+                SERIAL_PROTOCOLCHAR(' ');
+              SERIAL_PROTOCOL_F(diff, 5);
             } // xx
             SERIAL_EOL();
           } // yy
@@ -917,7 +928,9 @@ G29_TYPE GcodeSuite::G29() {
         // Correct the current XYZ position based on the tilted plane.
         //
 
-        if (DEBUGGING(LEVELING)) DEBUG_POS("G29 uncorrected XYZ", current_position);
+        #if ENABLED(DEBUG_LEVELING_FEATURE)
+          if (DEBUGGING(LEVELING)) DEBUG_POS("G29 uncorrected XYZ", current_position);
+        #endif
 
         float converted[XYZ];
         COPY(converted, current_position);
@@ -931,32 +944,46 @@ G29_TYPE GcodeSuite::G29() {
           && NEAR(current_position[Y_AXIS], yProbe - (Y_PROBE_OFFSET_FROM_EXTRUDER))
         ) {
           const float simple_z = current_position[Z_AXIS] - measured_z;
-          if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("Probed Z", simple_z, "  Matrix Z", converted[Z_AXIS], "  Discrepancy ", simple_z - converted[Z_AXIS]);
+          #if ENABLED(DEBUG_LEVELING_FEATURE)
+            if (DEBUGGING(LEVELING)) {
+              SERIAL_ECHOPAIR("Z from Probe:", simple_z);
+              SERIAL_ECHOPAIR("  Matrix:", converted[Z_AXIS]);
+              SERIAL_ECHOLNPAIR("  Discrepancy:", simple_z - converted[Z_AXIS]);
+            }
+          #endif
           converted[Z_AXIS] = simple_z;
         }
 
         // The rotated XY and corrected Z are now current_position
         COPY(current_position, converted);
 
-        if (DEBUGGING(LEVELING)) DEBUG_POS("G29 corrected XYZ", current_position);
+        #if ENABLED(DEBUG_LEVELING_FEATURE)
+          if (DEBUGGING(LEVELING)) DEBUG_POS("G29 corrected XYZ", current_position);
+        #endif
       }
 
     #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
 
       if (!dryrun) {
-        if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("G29 uncorrected Z:", current_position[Z_AXIS]);
+        #if ENABLED(DEBUG_LEVELING_FEATURE)
+          if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPAIR("G29 uncorrected Z:", current_position[Z_AXIS]);
+        #endif
 
         // Unapply the offset because it is going to be immediately applied
         // and cause compensation movement in Z
         current_position[Z_AXIS] -= bilinear_z_offset(current_position);
 
-        if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(" corrected Z:", current_position[Z_AXIS]);
+        #if ENABLED(DEBUG_LEVELING_FEATURE)
+          if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPAIR(" corrected Z:", current_position[Z_AXIS]);
+        #endif
       }
 
     #endif // ABL_PLANAR
 
     #ifdef Z_PROBE_END_SCRIPT
-      if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("Z Probe End Script: ", Z_PROBE_END_SCRIPT);
+      #if ENABLED(DEBUG_LEVELING_FEATURE)
+        if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPAIR("Z Probe End Script: ", Z_PROBE_END_SCRIPT);
+      #endif
       planner.synchronize();
       enqueue_and_echo_commands_P(PSTR(Z_PROBE_END_SCRIPT));
     #endif
@@ -968,7 +995,9 @@ G29_TYPE GcodeSuite::G29() {
   // Restore state after probing
   if (!faux) clean_up_after_endstop_or_probe_move();
 
-  if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("<<< G29");
+  #if ENABLED(DEBUG_LEVELING_FEATURE)
+    if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPGM("<<< G29");
+  #endif
 
   KEEPALIVE_STATE(IN_HANDLER);
 
@@ -984,4 +1013,4 @@ G29_TYPE GcodeSuite::G29() {
   G29_RETURN(isnan(measured_z));
 }
 
-#endif // HAS_ABL_NOT_UBL
+#endif // OLDSCHOOL_ABL

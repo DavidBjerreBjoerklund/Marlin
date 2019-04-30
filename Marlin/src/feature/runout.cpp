@@ -1,6 +1,6 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (C) 2019 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (C) 2016 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
  * Copyright (C) 2011 Camiel Gubbels / Erik van der Zalm
@@ -26,18 +26,14 @@
 
 #include "../inc/MarlinConfigPre.h"
 
-#if HAS_FILAMENT_SENSOR
+#if ENABLED(FILAMENT_RUNOUT_SENSOR)
 
 #include "runout.h"
 
 FilamentMonitor runout;
 
 bool FilamentMonitorBase::enabled = true,
-     FilamentMonitorBase::filament_ran_out;  // = false
-
-#if ENABLED(HOST_ACTION_COMMANDS)
-  bool FilamentMonitorBase::host_handling; // = false
-#endif
+     FilamentMonitorBase::filament_ran_out; // = false
 
 /**
  * Called by FilamentSensorSwitch::run when filament is detected.
@@ -58,4 +54,4 @@ void FilamentSensorBase::filament_present(const uint8_t extruder) {
   int8_t RunoutResponseDebounced::runout_count; // = 0
 #endif
 
-#endif // HAS_FILAMENT_SENSOR
+#endif // FILAMENT_RUNOUT_SENSOR
