@@ -1,6 +1,6 @@
 /**
  * Marlin 3D Printer Firmware
- * Copyright (C) 2016 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ * Copyright (C) 2019 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
  * Based on Sprinter and grbl.
  * Copyright (C) 2011 Camiel Gubbels / Erik van der Zalm
@@ -107,16 +107,24 @@
   // Generic support for SSD1309 OLED I2C LCDs
   #define U8G_CLASS U8GLIB_SSD1309_128X64
   #define U8G_PARAM (U8G_I2C_OPT_NONE | U8G_I2C_OPT_FAST)
-#elif ENABLED(MINIPANEL)
+#elif EITHER(MINIPANEL, FYSETC_MINI_12864)
   // The MINIPanel display
   //#define U8G_CLASS U8GLIB_MINI12864
   //#define U8G_PARAM DOGLCD_CS, DOGLCD_A0                            // 8 stripes
-  #define U8G_CLASS U8GLIB_MINI12864_2X
-  #define U8G_PARAM DOGLCD_CS, DOGLCD_A0                              // 4 stripes
+  #define U8G_CLASS U8GLIB_MINI12864_2X_HAL
+  #if BOTH(FYSETC_MINI_12864, FORCE_SOFT_SPI)
+    #define U8G_PARAM DOGLCD_SCK, DOGLCD_MOSI, DOGLCD_CS, DOGLCD_A0   // 4 stripes SW-SPI
+  #else
+    #define U8G_PARAM DOGLCD_CS, DOGLCD_A0                            // 4 stripes HW-SPI
+  #endif
 #elif ENABLED(U8GLIB_SH1106_EINSTART)
   // Connected via motherboard header
   #define U8G_CLASS U8GLIB_SH1106_128X64
   #define U8G_PARAM DOGLCD_SCK, DOGLCD_MOSI, DOGLCD_CS, LCD_PINS_DC, LCD_PINS_RS
+#elif ENABLED(MKS_ROBIN_TFT)
+  // Unspecified 320x240 TFT pre-initialized by built-in bootloader
+  #define U8G_CLASS U8GLIB_TFT_320X240_UPSCALE_FROM_128X64
+  #define U8G_PARAM FSMC_CS_PIN, FSMC_RS_PIN
 #else
   // for regular DOGM128 display with HW-SPI
   //#define U8G_CLASS U8GLIB_DOGM128
@@ -133,8 +141,9 @@
 #endif
 
 // For selective rendering within a Y range
-#define PAGE_UNDER(yb) (u8g.getU8g()->current_page.y0 <= (yb))
-#define PAGE_CONTAINS(ya, yb) (PAGE_UNDER(yb) && u8g.getU8g()->current_page.y1 >= (ya))
+#define PAGE_OVER(ya)         ((ya) <= u8g.getU8g()->current_page.y1) // Does the current page follow a region top?
+#define PAGE_UNDER(yb)        ((yb) >= u8g.getU8g()->current_page.y0) // Does the current page precede a region bottom?
+#define PAGE_CONTAINS(ya, yb) ((yb) >= u8g.getU8g()->current_page.y0 && (ya) <= u8g.getU8g()->current_page.y1) // Do two vertical regions overlap?
 
 // Only Western languages support big / small fonts
 #if DISABLED(DISPLAY_CHARSET_ISO10646_1)
